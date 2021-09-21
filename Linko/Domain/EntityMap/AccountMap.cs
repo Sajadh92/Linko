@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
 
 namespace Linko.Domain
 {
@@ -11,14 +12,14 @@ namespace Linko.Domain
 
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.UserId);
-            builder.Property(x => x.AccountName);
-            builder.Property(x => x.AccountType);
-            builder.Property(x => x.Prefix);
-            builder.Property(x => x.Link);
-            builder.Property(x => x.InsertDate);
-            builder.Property(x => x.UpdateDate);
-            builder.Property(x => x.DeleteDate);
+            builder.Property(x => x.UserId).IsRequired();
+            builder.Property(x => x.AccountName).HasMaxLength(25).IsRequired();
+            builder.Property(x => x.AccountType).HasMaxLength(25).IsRequired();
+            builder.Property(x => x.Prefix).HasMaxLength(25).IsRequired();
+            builder.Property(x => x.Link).HasMaxLength(25).IsRequired();
+            builder.Property(x => x.InsertDate).HasDefaultValue(DateTime.Now); 
+            builder.Property(x => x.UpdateDate).HasDefaultValue(null);
+            builder.Property(x => x.DeleteDate).HasDefaultValue(null);
             builder.Property(x => x.Version).IsRowVersion();
         }
     }
