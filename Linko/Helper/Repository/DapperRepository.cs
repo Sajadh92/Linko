@@ -4,7 +4,6 @@ using System.Data.Common;
 using Dapper;
 using System.Data;
 using System.Threading.Tasks;
-using Linko.Domain;
 using System.Collections.Generic;
 using System.Linq;
 
