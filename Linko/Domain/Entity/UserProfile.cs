@@ -11,6 +11,7 @@ namespace Linko.Domain
         public int AccountNo { get; set; }
         public string FullName { get; set; }
         public string ProfileImg { get; set; }
+        public string Lang { get; set; }
         public string Bio { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime LastAccessDate { get; set; }

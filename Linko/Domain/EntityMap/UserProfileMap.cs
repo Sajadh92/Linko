@@ -18,6 +18,7 @@ namespace Linko.Domain
             builder.Property(x => x.AccountNo).HasDefaultValue(0).IsRequired();
             builder.Property(x => x.FullName).HasMaxLength(50).IsRequired();
             builder.Property(x => x.ProfileImg).HasMaxLength(150).IsRequired();
+            builder.Property(x => x.Lang).HasMaxLength(2).IsRequired();
             builder.Property(x => x.Bio).HasMaxLength(255).IsRequired();
             builder.Property(x => x.IsDeleted).HasDefaultValue(false);
             builder.Property(x => x.LastAccessDate).HasDefaultValue(DateTime.Now).IsRequired();
