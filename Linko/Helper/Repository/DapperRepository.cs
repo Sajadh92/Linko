@@ -124,6 +124,20 @@ namespace Linko.Helper
             }
         }
 
+        //public async Task<List<TEntity>> GetEntityListAsync(string spName, object pars)
+        //{
+        //    try
+        //    {
+        //        IEnumerable<TEntity> result = await Connection.QueryAsync<TEntity>(spName, pars,
+        //           commandTimeout: 300, commandType: CommandType.StoredProcedure);
+
+        //        return result.ToList();
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
         public async Task<List<TEntity>> GetEntityListAsync(string spName, object pars)
         {
             try
