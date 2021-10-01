@@ -3,7 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linko", "Linko\Linko.csproj", "{92279237-A812-42C7-A704-9B58B450AC1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Linko", "Linko\Linko.csproj", "{92279237-A812-42C7-A704-9B58B450AC1D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3F71E37F-1177-489E-A5AD-A51F816CCE3B}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

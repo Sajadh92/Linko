@@ -9,17 +9,21 @@ namespace Linko.Controllers
     [ApiController]
     public class MasterController : ControllerBase
     {
-        protected UserProfile UserManager
+        protected UserJWTClaimDto UserManager
         {
             get
             {
                 // reading claim "UserProfile" from JWT Token
-                string user = HttpContext.User.Claims.Where(x => x.Type == "UserProfile").FirstOrDefault().Value;
+                string user = HttpContext.User.Claims
+                    .Where(x => x.Type == Key.Lookup[Key.UserProfile])
+                    .FirstOrDefault().Value;
 
                 // if claim is exists then deserialize it 
                 if (!string.IsNullOrWhiteSpace(user))
                 {
-                    return JsonConvert.DeserializeObject<UserProfile>(user);
+                    // TODO: get json of user profile from hash string 
+
+                    return JsonConvert.DeserializeObject<UserJWTClaimDto>(user);
                 }
 
                 // if no claim is found return null means the user is not logged in

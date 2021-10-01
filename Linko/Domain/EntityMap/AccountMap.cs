@@ -17,8 +17,10 @@ namespace Linko.Domain
             builder.Property(x => x.AccountType).HasMaxLength(25).IsRequired();
             builder.Property(x => x.Prefix).HasMaxLength(25).IsRequired();
             builder.Property(x => x.Link).HasMaxLength(25).IsRequired();
+            builder.Property(x => x.IsActive).IsRequired();
             builder.Property(x => x.InsertDate).HasDefaultValue(DateTime.Now); 
             builder.Property(x => x.UpdateDate).HasDefaultValue(null);
+            builder.Property(x => x.IsDeleted).HasDefaultValue(false).IsRequired();
             builder.Property(x => x.DeleteDate).HasDefaultValue(null);
             builder.Property(x => x.Version).IsRowVersion();
         }
