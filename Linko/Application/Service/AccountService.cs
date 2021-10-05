@@ -1,41 +1,100 @@
-﻿using Linko.Domain;
+﻿using AutoMapper;
+using Linko.Domain;
+using Linko.Domain.General;
 using Linko.Helper;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Threading.Tasks;
 
 namespace Linko.Application
 {
-    public class AccountService : IAccountService
+    public class AccountService : IAccountService, IRegisterScopped
     {
-        private readonly IDapperRepository<UserProfile> _userRepository;
+        private readonly IMapper _mapper;
         private readonly LinkoContext _context;
-
-        public AccountService(IDapperRepository<UserProfile> userRepository,
-            LinkoContext context)
+        private readonly IDapperRepository<UserProfile> _userRepository;
+        
+        public AccountService(
+            IMapper mapper,
+            LinkoContext context,
+            IDapperRepository<UserProfile> userRepository)
         {
-            _userRepository = userRepository;
+            _mapper = mapper;
             _context = context;
+            _userRepository = userRepository;
         }
 
-        public async Task<UserProfile> Login(LoginDto data)
+        public async Task<ResObj> Login(LoginDto data)
         {
-            return await _userRepository.GetEntityAsync("dbo.UserProfile_Login",
-                new { data.Username, data.Password });
+            if (data.Username.IsEmpty())
+                return Result.Return(false, Message.InvalidUsername);
 
-            //return _context.UsersProfiles
-            //    .Where(x => x.Username == data.Username
-            //    && x.Password == data.Password).FirstOrDefault();
+            if (data.Password.IsEmpty())
+                return Result.Return(false, Message.InvalidPassword);
+
+            UserProfile user = await GetByIdentity("Login", data.Username, data.Password);
+
+            if (user is null)
+                return Result.Return(false, Message.UsernameOrPasswordNotCorrect);
+
+            if (!user.IsActive)
+                return Result.Return(false, Message.UserNotActive);
+
+            if (user.IsDeleted)
+                return Result.Return(false, Message.UserIsDeleted);
+
+            user.LastAccessDate = Key.DateTimeIQ;
+
+            //_context.Update(user);
+
+            _context.Entry(user).State = EntityState.Modified;
+
+            await _context.SaveChangesAsync();
+
+            UserManager userManager = _mapper.Map<UserProfile, UserManager>(user);
+
+            string token = JsonWebToken.GenerateToken(userManager);
+
+            return Result.Return(true, new { token });
         }
 
-        public async Task<UserProfile> Register(RegisterDto data)
+        public async Task<ResObj> Register(RegisterDto data)
         {
-            return await _userRepository.GetEntityAsync("dbo.UserProfile_Register",
-                new { data.Username, data.Email });
+            if (data.Username.IsEmpty())
+                return Result.Return(false, Message.InvalidUsername);
+
+            if (data.Password.IsEmpty())
+                return Result.Return(false, Message.InvalidPassword);
+
+            if (data.Email.IsEmpty())
+                return Result.Return(false, Message.InvalidEmail);
+
+            if (data.Password.IsPasswordStrength())
+                return Result.Return(false, Message.PasswordNotStrength);
+
+            UserProfile user = await GetByIdentity("CheckIdentity", data.Username, data.Email);
+
+            if (user is null)
+                return Result.Return(false, Message.UsernameOrEmailAlreadyExist);
+
+            UserProfile profile = _mapper.Map<RegisterDto, UserProfile>(data);
+
+            profile.VerificationCode = new Random().Next(100000, 999999).ToString("D6");
+
+            await _context.UsersProfiles.AddAsync(profile);
+
+            await _context.SaveChangesAsync();
+
+            // TODO: Send profile.VerificationCode to profile.Email
+
+            return Result.Return(true);
         }
 
-        public async Task<UserProfile> VerificationEmail(VerificationEmailDto data)
+        public async Task<UserProfile> GetByIdentity(string CallType, string Identity, string PassOrCode)
         {
-            return await _userRepository.GetEntityAsync("dbo.UserProfile_VerificationEmail",
-                new { data.Email, data.VerificationCode });
+            return await _userRepository.GetEntityAsync("dbo.UserProfile_GetByIdentity",
+                new { CallType, Identity, PassOrCode });
         }
+
     }
 }

@@ -1,36 +1,41 @@
-﻿using System;
+﻿using Linko.Domain.General;
+using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Security.Cryptography;
 
 namespace Linko.Helper
 {
     public static class Key
     {
-        public static readonly string UserProfile = "UserProfile";
-
         public static readonly string SecretKey = "cdAsuIt+MtEDbT5p9I7o3TvBgteF+4l/2sFpWG4Hloi7Tre6Dsw3QBYTY8xbWva8GlKgJzQZdcR3Luqm/bgt5u==";
-        
         public static DateTime DateTimeIQ => DateTime.UtcNow.AddHours(3);
+    }
 
-        public static readonly Dictionary<string, string> Lookup = new()
+    public static class ClaimInfo
+    {
+        public static readonly string UserManager = "Linko001";
+    }
+
+    public static class Result
+    {
+        public static ResObj Return(bool success)
         {
-            { UserProfile , "Linko001" }
-        };
+            return new() { Success = success };
+        }
 
-        public static string GetHashString(string inputString)
+        public static ResObj Return(bool success, object data)
         {
-            using HashAlgorithm algorithm = SHA256.Create();
-            byte [] inputStringByte = algorithm.ComputeHash(Encoding.UTF8.GetBytes(inputString));
+            return new() { Success = success, Data = data };
+        }
 
-            StringBuilder sb = new();
+        public static ResObj Return(bool success, string msgCode)
+        {
+            return new() { Success = success, MsgCode = msgCode };
+        }
 
-            foreach (byte b in inputStringByte)
-                sb.Append(b.ToString("X2"));
-
-            string test = BitConverter.ToString(inputStringByte).Replace("-", string.Empty);
-
-            return sb.ToString();
+        public static ResObj Return(bool success, string msgCode, object data)
+        {
+            return new() { Success = success, MsgCode = msgCode, Data = data };
         }
     }
 }

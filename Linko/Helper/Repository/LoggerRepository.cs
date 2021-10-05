@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Linko.Helper.Repository
 {
-    public class LoggerRepository : ILoggerRepository
+    public class LoggerRepository : ILoggerRepository, IRegisterSingleton
     {
         private readonly string logFilePath = @"Files\Log.txt";
         private readonly IDapperRepository<Empty> _dapper;

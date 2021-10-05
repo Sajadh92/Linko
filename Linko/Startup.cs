@@ -1,12 +1,19 @@
+using AutoMapper;
+using Linko.Application;
 using Linko.Domain;
 using Linko.Helper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System;
+using System.Linq;
 
 namespace Linko
 {
@@ -24,12 +31,42 @@ namespace Linko
         {
             services.AddControllers();
 
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(cfg =>
+                {
+                    cfg.SaveToken = true;
+                    cfg.RequireHttpsMetadata = false;
+                    cfg.TokenValidationParameters = new()
+                    {
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        ValidateLifetime = true,
+                        RequireExpirationTime = true,
+                        ClockSkew = TimeSpan.FromHours(10),
+                        IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(Key.SecretKey))
+                    }; 
+                });
+
             services.AddDbContext<LinkoContext>(option => option.UseSqlServer(DBConn.ConnectionString),
                 ServiceLifetime.Scoped, ServiceLifetime.Scoped);
 
-            services.AddSwaggerGen(c =>
+            //services.AddSingleton(typeof(IDapperRepository<>), typeof(DapperRepository<>));
+            //services.AddSingleton<ILoggerRepository, LoggerRepository>();
+            //services.AddScoped<IAccountService, AccountService>();
+
+            // Auto Mapper Configurations
+            IMapper mapper = new MapperConfiguration
+                (mc => { mc.AddProfile(new MappingProfile()); })
+                .CreateMapper();
+
+            services.AddSingleton(mapper);
+
+            RegisterServices<IRegisterScopped>(services);
+            RegisterServices<IRegisterSingleton>(services);
+
+            services.AddSwaggerGen(setupAction =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Linko", Version = "v1" });
+                setupAction.SwaggerDoc("v1", new OpenApiInfo { Title = "Linko", Version = "v1" });
             });
         }
 
@@ -51,6 +88,26 @@ namespace Linko
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private static void RegisterServices<ServiceType>(IServiceCollection services)
+        {
+            var myServices = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes());
+
+            myServices.Where(service => typeof(ServiceType).IsAssignableFrom(service) && service != typeof(ServiceType))
+                .ToList().ForEach((service) =>
+                {
+                    Type interfaceType = myServices.FirstOrDefault(x => x.Name == "I" + service.Name);
+
+                    if (interfaceType == null && typeof(ServiceType) == typeof(IRegisterScopped))
+                        services.AddScoped(service);
+                    else if (interfaceType == null && typeof(ServiceType) == typeof(IRegisterSingleton))
+                        services.AddSingleton(service);
+                    else if (interfaceType != null && typeof(ServiceType) == typeof(IRegisterScopped))
+                        services.AddScoped(interfaceType, service);
+                    else if (interfaceType != null && typeof(ServiceType) == typeof(IRegisterSingleton))
+                        services.AddSingleton(interfaceType, service);
+                });
         }
     }
 }

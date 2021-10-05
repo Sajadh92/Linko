@@ -9,7 +9,7 @@ namespace Linko.Helper
 {
     public static class JsonWebToken
     {
-        public static string GenerateToken(UserJWTClaimDto userJWT)
+        public static string GenerateToken(UserManager UserManager)
         {
             byte[] symmetricKey = Convert.FromBase64String(Key.SecretKey);
             SymmetricSecurityKey securityKey = new(symmetricKey);
@@ -19,13 +19,9 @@ namespace Linko.Helper
             SecurityToken stoken = tokenHandler.CreateToken(
                 new SecurityTokenDescriptor
                 {
-                    Issuer = "Issuer",
-                    Audience = "Audience",
-                    NotBefore = Key.DateTimeIQ,
                     Expires = Key.DateTimeIQ.AddDays(30),
                     Subject = new ClaimsIdentity(new[] {
-                        new Claim(Key.Lookup[Key.UserProfile], 
-                        Key.GetHashString(JsonConvert.SerializeObject(userJWT)))
+                        new Claim(ClaimInfo.UserManager, JsonConvert.SerializeObject(UserManager))
                     }),
                     SigningCredentials = new SigningCredentials(securityKey, algorithms)
                 });

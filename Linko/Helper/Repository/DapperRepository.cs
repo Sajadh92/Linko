@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Linko.Helper
 {
-    public class DapperRepository<TEntity> : IDapperRepository<TEntity>
+    public class DapperRepository<TEntity> : IDapperRepository<TEntity>, IRegisterSingleton
     {
         private static DbConnection Connection;
 
