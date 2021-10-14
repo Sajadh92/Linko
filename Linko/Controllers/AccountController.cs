@@ -1,12 +1,9 @@
-﻿using AutoMapper;
-using Linko.Application;
+﻿using Linko.Application;
 using Linko.Domain;
-using Linko.Domain.General;
 using Linko.Helper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Linko.Controllers
@@ -16,189 +13,67 @@ namespace Linko.Controllers
     public class AccountController : MasterController
     {
         #region Readonly
-        private readonly IMapper _mapper;
-        private readonly LinkoContext _context;
         private readonly ILoggerRepository _logger;
-        private readonly IAccountService _accountService;
+        private readonly IAccountService _service;
         #endregion
 
         #region Const
         public AccountController(
-            IMapper mapper,
-            LinkoContext context,
-            ILoggerRepository logger, 
-            IAccountService accountService)
+            ILoggerRepository logger,
+            IAccountService service)
         {
-            _mapper = mapper;
-            _context = context;
             _logger = logger;
-            _accountService = accountService;
+            _service = service;
         }
         #endregion
 
-        #region Login
-        public async Task<IActionResult> Login(LoginDto data)
+        #region GetByUsername
+        public async Task<IActionResult> GetByUsername(string Username)
         {
             try
             {
-                ResObj res = await _accountService.Login(data);
+                List<Account> data = await _service.GetByUsername(Username);
 
-                return Response(res.Success, res.MsgCode, res.Data);
+                return Response(true, data);
             }
             catch(Exception ex)
             {
-                await _logger.WriteAsync(ex, "AccountController => Login => Username:" + data.Username);
-                return Response(false, Message.LoginFaild);
+                await _logger.WriteAsync(ex, $"Account/GetByUsername/{Username}");
+                return Response(false, Message.GetUserAccountsFaild);
             }
         }
         #endregion
 
-        #region Register
-        public async Task<IActionResult> Register(RegisterDto data)
+        #region GetByID
+        public async Task<IActionResult> GetByID(int Id) 
         {
             try
             {
-                ResObj res = await _accountService.Register(data);
+                Account data = await _service.GetByID(Id, UserManager.Id);
 
-                return Response(res.Success, res.MsgCode, res.Data);
+                return Response(true, data);
             }
             catch (Exception ex)
             {
-                await _logger.WriteAsync(ex, "AccountController => Register => Email:" + data.Email);
-                return Response(false, Message.RegisterFaild);
+                await _logger.WriteAsync(ex, $"Account/GetByID/{Id}");
+                return Response(false, Message.GetFaild);
             }
         }
         #endregion
 
-        #region VerificationEmail
-        public async Task<IActionResult> VerificationEmail(VerificationEmailDto data)
+        #region GetData
+        public async Task<IActionResult> GetData()
         {
             try
             {
-                if (data.Email.IsEmpty())
-                    return Response(false, Message.InvalidEmail);
+                List<Account> data = await _service.GetData(UserManager.Id);
 
-                if (data.VerificationCode.IsEmpty() || data.VerificationCode.Length != 6)
-                    return Response(false, Message.InvalidVerificationCode);
-
-                UserProfile user = await _accountService
-                    .GetByIdentity("VerifiCode", data.Email, data.VerificationCode);
-
-                if (user is null)
-                    return Response(false, Message.EmailOrVerificationCodeNotCorrect);
-
-                user.IsActive = true;
-                user.VerificationCode = string.Empty;
-
-                _context.Entry(user).State = EntityState.Modified;
-
-                await _context.SaveChangesAsync();
-
-                return Response(true);
+                return Response(true, data);
             }
             catch (Exception ex)
             {
-                await _logger.WriteAsync(ex, "AccountController => VerificationEmail => Email:" + data.Email);
-                return Response(false, Message.VerificationFaild);
-            }
-        }
-        #endregion
-
-        #region FindUserProfile
-        public async Task<IActionResult> FindUserProfile(string userIdentity)
-        {
-            try
-            {
-                if (userIdentity.IsEmpty())
-                    return Response(false, Message.InvalidIdentity);
-
-                UserProfile user = await _accountService
-                    .GetByIdentity("CheckIdentity", userIdentity);
-
-                //UserProfile user = _context.UsersProfiles
-                //    .Where(x => x.Username == userIdentity || x.Email == userIdentity)
-                //    .FirstOrDefault();
-
-                if (user is null)
-                    return Response(false, Message.UserNotExist);
-
-                if (!user.IsActive)
-                    return Response(false, Message.UserNotActive);
-
-                if (user.IsDeleted)
-                    return Response(false, Message.UserIsDeleted);
-
-                user.VerificationCode = new Random().Next(100000, 999999).ToString("D6");
-
-                _context.Entry(user).State = EntityState.Modified;
-
-                //_context.Update(user);
-
-                await _context.SaveChangesAsync();
-
-                // TODO: Send profile.VerificationCode to profile.Email
-
-                return Response(true);
-            }
-            catch (Exception ex)
-            {
-                await _logger.WriteAsync(ex, "AccountController => FindUserProfile => UserIdentity:" + userIdentity);
-                return Response(false, Message.FindUserProfileFaild);
-            }
-        }
-        #endregion
-
-        #region ChangePassword
-        public async Task<IActionResult> ChangePassword(ChangePasswordDto data)
-        {
-            // type => (Change, Forget)
-
-            try
-            {
-                if (data.UserIdentity.IsEmpty())
-                    return Response(false, Message.InvalidIdentity);
-
-                if (data.VerificationCode.IsEmpty() || data.VerificationCode.Length != 6)
-                    return Response(false, Message.InvalidVerificationCode);
-
-                if (data.OldPassword.IsEmpty() || data.NewPassword.IsEmpty())
-                    return Response(false, Message.InvalidPassword);
-
-                if (data.NewPassword.IsPasswordStrength())
-                    return Response(false, Message.PasswordNotStrength);
-
-                UserProfile user = await _accountService
-                    .GetByIdentity("CheckIdentity", data.UserIdentity);
-
-                //UserProfile user = _context.UsersProfiles
-                //    .Where(x => x.Username == data.UserIdentity || x.Email == data.UserIdentity)
-                //    .FirstOrDefault();
-
-                if (user is null)
-                    return Response(false, Message.UserNotExist);
-
-                if (data.Type == "Change" && user.Password == data.OldPassword)
-                    user.Password = data.NewPassword;
-                else
-                    return Response(false, Message.OldPasswordNotCorrect);
-
-                if (data.Type == "Forget" && user.VerificationCode == data.VerificationCode)
-                    user.Password = data.NewPassword;
-                else
-                    return Response(false, Message.VerificationCodeNotCorrect);
-
-                _context.Entry(user).State = EntityState.Modified;
-
-                //_context.Update(user);
-
-                await _context.SaveChangesAsync();
-
-                return Response(true);
-            }
-            catch (Exception ex)
-            {
-                await _logger.WriteAsync(ex, "AccountController => ChangePassword => UserIdentity:" + data.UserIdentity);
-                return Response(false, Message.ChangePasswordFaild);
+                await _logger.WriteAsync(ex, $"Account/GetData/{UserManager.Id}");
+                return Response(false, Message.GetFaild);
             }
         }
         #endregion

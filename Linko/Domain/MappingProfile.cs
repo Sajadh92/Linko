@@ -9,6 +9,7 @@ namespace Linko.Domain
             // CreateMap<MainEntity, DtoEntity>();
 
             CreateMap<UserProfile, UserManager>().ReverseMap();
+            CreateMap<RegisterDto, UserProfile>().ReverseMap();
         }
     }
 }

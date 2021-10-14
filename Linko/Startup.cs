@@ -1,11 +1,9 @@
 using AutoMapper;
-using Linko.Application;
 using Linko.Domain;
 using Linko.Helper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,7 +42,7 @@ namespace Linko
                         RequireExpirationTime = true,
                         ClockSkew = TimeSpan.FromHours(10),
                         IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(Key.SecretKey))
-                    }; 
+                    };
                 });
 
             services.AddDbContext<LinkoContext>(option => option.UseSqlServer(DBConn.ConnectionString),

@@ -27,7 +27,10 @@ namespace Linko.Helper
         public static readonly string ChangePasswordFaild = "ChangePasswordFaild";
         public static readonly string ForgetPasswordFaild = "ForgetPasswordFaild";
         public static readonly string FindUserProfileFaild = "FindUserProfileFaild";
-        
+        public static readonly string GetUserAccountsFaild = "GetUserAccountsFaild";
+        public static readonly string GetFaild = "GetFaild";
+
+
         public static readonly Dictionary<string, Dictionary<string, string>> MsgDictionary = new()
         {
             {

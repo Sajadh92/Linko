@@ -21,8 +21,6 @@ namespace Linko.Controllers
                 // if claim is exists then deserialize it 
                 if (!string.IsNullOrWhiteSpace(user))
                 {
-                    // TODO: get json of user profile from hash string 
-
                     return JsonConvert.DeserializeObject<UserManager>(user);
                 }
 
@@ -35,6 +33,7 @@ namespace Linko.Controllers
         {
             return Ok(new { success });
         }
+
         public new IActionResult Response(bool success, object data)
         {
             return Ok(new { success, data });

@@ -1,13 +1,13 @@
 ﻿using Linko.Domain;
-using Linko.Domain.General;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Linko.Application
 {
     public interface IAccountService
     {
-        public Task<ResObj> Login(LoginDto data);
-        public Task<ResObj> Register(RegisterDto data);
-        public Task<UserProfile> GetByIdentity(string CallType, string Identity, string PassOrCode = "");
+        public Task<List<Account>> GetByUsername(string Username);
+        public Task<Account> GetByID(int Id, int UserId);
+        public Task<List<Account>> GetData(int UserId);
     }
 }
