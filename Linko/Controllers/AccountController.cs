@@ -1,4 +1,5 @@
-﻿using Linko.Application;
+﻿using AutoMapper;
+using Linko.Application;
 using Linko.Domain;
 using Linko.Helper;
 using Microsoft.AspNetCore.Mvc;
@@ -15,19 +16,23 @@ namespace Linko.Controllers
         #region Readonly
         private readonly ILoggerRepository _logger;
         private readonly IAccountService _service;
+        private readonly IMapper _mapper;
         #endregion
 
         #region Const
         public AccountController(
             ILoggerRepository logger,
-            IAccountService service)
+            IAccountService service,
+            IMapper mapper)
         {
             _logger = logger;
             _service = service;
+            _mapper = mapper;
         }
         #endregion
 
         #region GetByUsername
+        [HttpGet]
         public async Task<IActionResult> GetByUsername(string Username)
         {
             try
@@ -45,6 +50,7 @@ namespace Linko.Controllers
         #endregion
 
         #region GetByID
+        [HttpGet]
         public async Task<IActionResult> GetByID(int Id) 
         {
             try
@@ -62,6 +68,7 @@ namespace Linko.Controllers
         #endregion
 
         #region GetData
+        [HttpGet]
         public async Task<IActionResult> GetData()
         {
             try
@@ -74,6 +81,97 @@ namespace Linko.Controllers
             {
                 await _logger.WriteAsync(ex, $"Account/GetData/{UserManager.Id}");
                 return Response(false, Message.GetFaild);
+            }
+        }
+        #endregion
+
+        #region Insert
+        [HttpPost]
+        public async Task<IActionResult> Insert(InsertAccountDto data)
+        {
+            try
+            {
+                Account account = _mapper.Map<InsertAccountDto, Account>(data);
+
+                ResObj res = await _service.Insert(account, UserManager);
+
+                return Response(res.Success, res.MsgCode, res.Data);
+            }
+            catch (Exception ex)
+            {
+                await _logger.WriteAsync(ex, $"Account/Insert/{UserManager.Id}");
+                return Response(false, Message.InsertFaild);
+            }
+        }
+        #endregion
+
+        #region Update
+        [HttpPost]
+        public async Task<IActionResult> Update(UpdateAccountDto data)
+        {
+            try
+            {
+                Account account = _mapper.Map<UpdateAccountDto, Account>(data);
+
+                ResObj res = await _service.Update(account, UserManager);
+
+                return Response(res.Success, res.MsgCode, res.Data);
+            }
+            catch (Exception ex)
+            {
+                await _logger.WriteAsync(ex, $"Account/Update/UserId={UserManager.Id}&AccountId={data.Id}");
+                return Response(false, Message.UpdateFaild);
+            }
+        }
+        #endregion
+
+        #region Delete
+        public async Task<IActionResult> Delete(int Id)
+        {
+            try
+            {
+                ResObj res = await _service.Delete(Id, UserManager);
+
+                return Response(res.Success, res.MsgCode, res.Data);
+            }
+            catch (Exception ex)
+            {
+                await _logger.WriteAsync(ex, $"Account/Delete/UserId={UserManager.Id}&AccountId={Id}");
+                return Response(false, Message.DeleteFaild);
+            }
+        }
+        #endregion
+
+        #region UndoDelete
+        public async Task<IActionResult> UndoDelete(int Id)
+        {
+            try
+            {
+                ResObj res = await _service.UndoDelete(Id, UserManager);
+
+                return Response(res.Success, res.MsgCode, res.Data);
+            }
+            catch (Exception ex)
+            {
+                await _logger.WriteAsync(ex, $"Account/UndoDelete/UserId={UserManager.Id}&AccountId={Id}");
+                return Response(false, Message.UndoDeleteFaild);
+            }
+        }
+        #endregion
+
+        #region PermanentlyDelete
+        public async Task<IActionResult> PermanentlyDelete(int Id)
+        {
+            try
+            {
+                ResObj res = await _service.PermanentlyDelete(Id, UserManager);
+
+                return Response(res.Success, res.MsgCode, res.Data);
+            }
+            catch (Exception ex)
+            {
+                await _logger.WriteAsync(ex, $"Account/PermanentlyDelete/UserId={UserManager.Id}&AccountId={Id}");
+                return Response(false, Message.PermanentlyDeleteFaild);
             }
         }
         #endregion

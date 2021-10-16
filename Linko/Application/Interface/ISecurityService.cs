@@ -1,5 +1,4 @@
 ﻿using Linko.Domain;
-using Linko.Domain.General;
 using System.Threading.Tasks;
 
 namespace Linko.Application

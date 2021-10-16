@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Linko.Domain;
-using Linko.Domain.General;
 using Linko.Helper;
 using Microsoft.EntityFrameworkCore;
 using System;

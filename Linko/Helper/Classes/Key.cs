@@ -1,4 +1,4 @@
-﻿using Linko.Domain.General;
+﻿using Linko.Domain;
 using System;
 
 namespace Linko.Helper

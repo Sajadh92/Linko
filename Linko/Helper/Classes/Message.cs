@@ -29,7 +29,12 @@ namespace Linko.Helper
         public static readonly string FindUserProfileFaild = "FindUserProfileFaild";
         public static readonly string GetUserAccountsFaild = "GetUserAccountsFaild";
         public static readonly string GetFaild = "GetFaild";
-
+        public static readonly string InsertFaild = "InsertFaild";
+        public static readonly string UpdateFaild = "UpdateFaild";
+        public static readonly string DeleteFaild = "DeleteFaild";
+        public static readonly string UndoDeleteFaild = "UndoDeleteFaild";
+        public static readonly string PermanentlyDeleteFaild = "PermanentlyDeleteFaild";
+        
 
         public static readonly Dictionary<string, Dictionary<string, string>> MsgDictionary = new()
         {

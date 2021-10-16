@@ -1,4 +1,4 @@
-﻿namespace Linko.Domain.General
+﻿namespace Linko.Domain
 {
     public class ResObj
     {

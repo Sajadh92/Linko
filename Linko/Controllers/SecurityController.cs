@@ -1,6 +1,5 @@
 ﻿using Linko.Application;
 using Linko.Domain;
-using Linko.Domain.General;
 using Linko.Helper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
