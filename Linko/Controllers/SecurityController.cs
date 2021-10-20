@@ -3,6 +3,7 @@ using Linko.Domain;
 using Linko.Helper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Threading.Tasks;
 

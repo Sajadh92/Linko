@@ -48,6 +48,8 @@ namespace Linko
             services.AddDbContext<LinkoContext>(option => option.UseSqlServer(DBConn.ConnectionString),
                 ServiceLifetime.Scoped, ServiceLifetime.Scoped);
 
+            services.AddMemoryCache();
+
             //services.AddSingleton(typeof(IDapperRepository<>), typeof(DapperRepository<>));
             //services.AddSingleton<ILoggerRepository, LoggerRepository>();
             //services.AddScoped<IAccountService, AccountService>();
